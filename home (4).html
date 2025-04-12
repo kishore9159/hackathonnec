@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoSeat - Exam Hall Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ===== RESET & BASE ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        /* ===== HEADER ===== */
+        header {
+            background: linear-gradient(135deg, #003366, #0055a5);
+            color: white;
+            padding: 2rem 1rem;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logo {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .tagline {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        /* ===== NAVIGATION ===== */
+        nav {
+            background: #0055a5;
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .nav-container {
+            display: flex;
+            justify-content: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        nav a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1.2rem;
+            margin: 0 0.5rem;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        
+        nav a:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        /* ===== MAIN CONTENT ===== */
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #003366;
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: #0055a5;
+        }
+        
+        /* ===== MODULES GRID ===== */
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .module-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .module-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+        }
+        
+        .module-icon {
+            background: #e6f0ff;
+            color: #0055a5;
+            font-size: 2rem;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .module-content {
+            padding: 1.5rem;
+        }
+        
+        .module-content h3 {
+            color: #003366;
+            margin-bottom: 0.5rem;
+        }
+        
+        .module-content p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        /* ===== FOOTER ===== */
+        footer {
+            background: #003366;
+            color: white;
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: 3rem;
+        }
+        
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-wrap: wrap;
+            }
+            
+            nav a {
+                margin: 0.25rem;
+                padding: 0.5rem;
+                font-size: 0.9rem;
+            }
+            
+            .logo {
+                font-size: 2rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .modules-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">Smart Exam Hall Seat Allocation And Navigation System</div>
+    </header>
+    
+    <nav>
+        <div class="nav-container">
+            <a href="admin_seat.html"></a>
+            <a href="Navigation.html"></a>
+            <a href="seat_view.html"></a>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <h2 class="section-title">System Modules</h2>
+        
+        <div class="modules-grid">
+            <!-- Module 1: Seat Allocation -->
+            <div class="module-card" onclick="window.location.href='admin_seat.html'">
+                <div class="module-icon">
+                    <i class="fas fa-chair"></i>
+                </div>
+                <div class="module-content">
+                    <h3>Admin Seat Allocation</h3>
+                    <p>AI-powered automatic seat assignment with conflict prevention</p>
+                </div>
+            </div>
+            
+            
+            
+            <!-- Module 2: Seat View -->
+            <div class="module-card" onclick="window.location.href='seat_view.html'">
+                <div class="module-icon">
+                    <i class="fas fa-user-graduate"></i>
+                </div>
+                <div class="module-content">
+                    <h3>Seat View</h3>
+                    <p>View your assigned exam seat and personal schedule</p>
+                </div>
+            </div>
+            <!-- Module 3: Hall Navigation -->
+            <div class="module-card" onclick="window.location.href='Navigation.html'">
+                <div class="module-icon">
+                    <i class="fas fa-map-marked-alt"></i>
+                </div>
+                <div class="module-content">
+                    <h3>Hall Navigation</h3>
+                    <p>Interactive maps with directions to your exam seat</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</body>
+</html>

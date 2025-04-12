@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Exam Seating System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        header {
+            background: linear-gradient(135deg, #003366, #0055a5);
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .control-panel,
+        .hall-selection,
+        .seat-map,
+        .student-list {
+            background: white;
+            margin: 2rem auto;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .panel-title {
+            color: #0055a5;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .params {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .param-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .param-group label {
+            font-weight: 500;
+            color: #555;
+        }
+
+        .param-group select,
+        .param-group input {
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        .btn {
+            background: #4CAF50;
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: background 0.3s;
+            margin-right: 1rem;
+        }
+
+        .btn:hover {
+            background: #3e8e41;
+        }
+
+        .btn-danger {
+            background: #f44336;
+        }
+
+        .btn-danger:hover {
+            background: #d32f2f;
+        }
+
+        .bench-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            max-width: 800px;
+        }
+
+        .bench {
+            display: flex;
+            flex-direction: row;
+            gap: 0.5rem;
+        }
+
+        .bench-label {
+            text-align: center;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .seat {
+            width: 70px;
+            padding: 8px;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            min-height: 60px;
+        }
+
+        .seat.empty {
+            background: #e0e0e0;
+            color: #757575;
+        }
+
+        .seat.yearII {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .seat.yearIII {
+            background: #2196F3;
+            color: white;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
+
+        .student-list h3 {
+            color: #0055a5;
+            margin-bottom: 1rem;
+        }
+
+        .student-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .student-table th,
+        .student-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .student-table th {
+            background: #f5f7fa;
+            font-weight: 600;
+        }
+
+        .student-table tr:hover {
+            background: #f5f7fa;
+        }
+
+        .multi-select {
+            width: 100%;
+        }
+
+        .select2-container {
+            width: 100% !important;
+        }
+
+        .dual-selection {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .selection-group {
+            border: 1px solid #ddd;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>College Exam Seating System</h1>
+        <p>Automated seat allocation with anti-cheating measures</p>
+    </header>
+
+    <div class="container">
+        <!-- Control Panel -->
+        <div class="control-panel">
+            <h2 class="panel-title">
+                <i class="fas fa-cogs"></i> Exam Configuration
+            </h2>
+
+            <div class="params">
+                <div class="param-group">
+                    <label for="exam-type">Exam Type</label>
+                    <select id="exam-type">
+                        <option value="cat1">CAT 1</option>
+                        <option value="cat2">CAT 2</option>
+                        <option value="semester">Even Semester Exam</option>
+                    </select>
+                </div>
+
+                <div class="param-group">
+                    <label for="date">Date</label>
+                    <input type="date" id="date">
+                </div>
+
+                <div class="param-group">
+                    <label for="session">Session</label>
+                    <select id="session">
+                        <option value="FN">Forenoon (FN) - 9:00 AM to 12:00 PM</option>
+                        <option value="AN">Afternoon (AN) - 1:00 PM to 4:00 PM</option>
+                    </select>
+                </div>
+
+                <div class="param-group">
+                    <label for="block">Block</label>
+                    <select id="block">
+                        <option value="A">Block A</option>
+                        <option value="B">Block B</option>
+                        <option value="C">Block C</option>
+                    </select>
+                </div>
+
+                <div class="param-group">
+                    <label for="hall">Hall</label>
+                    <select id="hall">
+                        <option value="Hall 1">Hall 1</option>
+                        <option value="Hall 2">Hall 2</option>
+                        <option value="Hall 3">Hall 3</option>
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <button class="btn" onclick="loadSampleData()">
+                    <i class="fas fa-database"></i> Load Sample Data
+                </button>
+                <button class="btn" onclick="generateSeating()">
+                    <i class="fas fa-magic"></i> Generate Seating
+                </button>
+                <button class="btn-danger" onclick="resetAll()">
+                    <i class="fas fa-trash"></i> Reset All
+                </button>
+                <button class="btn" onclick="downloadPDF()">
+                    <i class="fas fa-file-pdf"></i> Download PDF
+                </button>
+            </div>
+        </div>
+
+        <!-- Departments and Subjects Selection -->
+        <div class="hall-selection">
+            <h3 class="panel-title">
+                <i class="fas fa-building"></i> Select Departments and Subjects
+            </h3>
+
+            <div class="dual-selection">
+                <!-- First Group (Second Year) -->
+                <div class="selection-group">
+                    <h4>Second Year Students</h4>
+                    <div class="params">
+                        <div class="param-group">
+                            <label for="dept-year2">Department</label>
+                            <select id="dept-year2" onchange="updateSubjectSelection('year2')">
+                                <option value="CSE">CSE</option>
+                                <option value="CS(CS)">CSE (Cyber Security)</option>
+                                <option value="CS(IOT)">CSE (IoT)</option>
+                                <option value="AI&DS">AI & DS</option>
+                                <option value="IT">IT</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="param-group">
+                        <label for="subjects-year2">Subjects</label>
+                        <select id="subjects-year2" class="multi-select" multiple="multiple">
+                            <!-- Subjects will be populated based on department -->
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Second Group (Third Year) -->
+                <div class="selection-group">
+                    <h4>Third Year Students</h4>
+                    <div class="params">
+                        <div class="param-group">
+                            <label for="dept-year3">Department</label>
+                            <select id="dept-year3" onchange="updateSubjectSelection('year3')">
+                                <option value="CSE">CSE</option>
+                                <option value="CS(CS)">CSE (Cyber Security)</option>
+                                <option value="CS(IOT)">CSE (IoT)</option>
+                                <option value="AI&DS">AI & DS</option>
+                                <option value="IT">IT</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="param-group">
+                        <label for="subjects-year3">Subjects</label>
+                        <select id="subjects-year3" class="multi-select" multiple="multiple">
+                            <!-- Subjects will be populated based on department -->
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seat Map Visualization -->
+        <div class="seat-map">
+            <h3 class="panel-title" id="map-title">Seating Arrangement</h3>
+
+            <div class="bench-grid" id="bench-grid">
+                <!-- Benches will be generated by JavaScript -->
+            </div>
+
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #4CAF50;"></div>
+                    <span>II Year</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #2196F3;"></div>
+                    <span>III Year</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Student List -->
+        <div class="student-list" id="student-list">
+            <h3><i class="fas fa-users"></i> Student Allocation Details</h3>
+            <table class="student-table">
+                <thead>
+                    <tr>
+                        <th>Bench</th>
+                        <th>Roll No</th>
+                        <th>Name</th>
+                        <th>Department</th>
+                        <th>Year</th>
+                        <th>Subjects</th>
+                    </tr>
+                </thead>
+                <tbody id="student-table-body">
+                    <!-- Student data will be inserted here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.3.1/jspdf.umd.min.js"></script>
+    <script>
+        let students = [];
+
+        // Subject data structure
+        const departmentSubjects = {
+            "CSE": {
+                "II": ["Artificial Intelligence and Machine Learning", "Theory of Computation", "Database Management System",
+                       "Advanced Java Programming", "Foundations of Data Science", "Environmental Science and Engineering"],
+                "III": ["Internet of Things and its Applications", "Mobile Application Development", "Entrepreneurship Development",
+                       "Software Testing Tools and Techniques", "Business Intelligence", "DevOps"]
+            },
+            "CS(CS)": {
+                "II": ["Artificial Intelligence and Machine Learning", "Secure Software Engineering", "Database Security",
+                       "Advanced Java Programming", "Cryptography and Network Security"],
+                "III": ["Cyber Forensics", "Blockchain Technology", "Entrepreneurship Development",
+                       "Intrusion Detection System", "Information Security Management"]
+            },
+            "CS(IOT)": {
+                "II": ["Artificial Intelligence and Machine Learning", "Computer Networks", "Database Management System",
+                       "Sensors and Actuator Devices", "Privacy and Security in IoT", "Environmental Science and Engineering"],
+                "III": ["Mobile Application Development for IoT", "Computer Vision and Robotics", "Entrepreneurship Development",
+                       "Software Project Management", "Computer Vision and Robotics", "Industrial and Medical IoT"]
+            },
+            "AI&DS": {
+                "II": ["Probability and Statistics", "Environmental Science and Engineering", "Operating Systems",
+                       "Database Design and Management", "Machine Learning", "Fundamentals of Data Science and Analytics"],
+                "III": ["Full Stack Development", "Big Data Analytics", "Entrepreneurship Development",
+                       "Software Project Management", "Optimization Techniques", "Image and Video Analytics"]
+            },
+            "IT": {
+                "II": ["Theory of Computation", "Fundamentals of Data Science", "Database Management System",
+                       "Agile Methodologies", "Advanced Java Programming", "Environmental Science and Engineering"],
+                "III": ["Full Stack Development", "Mobile Application Development", "Entrepreneurship Development",
+                       "Software Project Management", "Software Testing Tools and Techniques", "Software Quality Assurance"]
+            }
+        };
+
+        // Initialize Select2 for multi-select dropdowns
+        $(document).ready(function () {
+            $('.multi-select').select2({
+                placeholder: "Select subjects",
+                allowClear: true
+            });
+
+            // Initialize subjects based on default selections
+            updateSubjectSelection('year2');
+            updateSubjectSelection('year3');
+        });
+
+        function updateSubjectSelection(yearGroup) {
+            const deptSelect = document.getElementById(`dept-${yearGroup}`);
+            const year = yearGroup === 'year2' ? 'II' : 'III';
+            const department = deptSelect.value;
+
+            // Get subjects for selected department and year
+            const subjects = departmentSubjects[department][year] || [];
+
+            // Update subjects dropdown
+            const $subjects = $(`#subjects-${yearGroup}`);
+            $subjects.empty();
+
+            subjects.forEach(subject => {
+                $subjects.append(new Option(subject, subject));
+            });
+
+            // Select all subjects by default
+            $subjects.val(subjects).trigger('change');
+        }
+
+        function initBenchMap() {
+            const benchGrid = document.getElementById("bench-grid");
+            benchGrid.innerHTML = "";
+
+            for (let row = 1; row <= 5; row++) {
+                for (let col = 1; col <= 5; col++) {
+                    const bench = document.createElement("div");
+                    bench.className = "bench";
+                    bench.dataset.row = row;
+                    bench.dataset.col = col;
+
+                    const benchLabel = document.createElement("div");
+                    benchLabel.className = "bench-label";
+                    benchLabel.textContent = `Bench ${String.fromCharCode(64 + row)}${col}`;
+
+                    const seat1 = document.createElement("div");
+                    seat1.className = "seat empty";
+                    seat1.textContent = "Empty";
+                    seat1.dataset.position = "left";
+
+                    const seat2 = document.createElement("div");
+                    seat2.className = "seat empty";
+                    seat2.textContent = "Empty";
+                    seat2.dataset.position = "right";
+
+                    bench.appendChild(benchLabel);
+                    bench.appendChild(seat1);
+                    bench.appendChild(seat2);
+                    benchGrid.appendChild(bench);
+                }
+            }
+        }
+
+        function loadSampleData() {
+            const deptYear2 = document.getElementById("dept-year2").value;
+            const deptYear3 = document.getElementById("dept-year3").value;
+            const subjectsYear2 = $('#subjects-year2').val() || [];
+            const subjectsYear3 = $('#subjects-year3').val() || [];
+
+            // Clear any existing data
+            students = [];
+
+            // Generate second year students
+            for (let i = 1; i <= 25; i++) {
+                const rollNo = `23${deptYear2.substring(0, 2)}-${i.toString().padStart(3, '0')}`;
+                const name = `Second Year ${deptYear2} Student ${i}`;
+                students.push({
+                    id: rollNo,
+                    name: name,
+                    department: deptYear2,
+                    year: "II",
+                    subjects: [...subjectsYear2]
+                });
+            }
+
+            // Generate third year students
+            for (let i = 1; i <= 25; i++) {
+                const rollNo = `22${deptYear3.substring(0, 2)}-${i.toString().padStart(3, '0')}`;
+                const name = `Third Year ${deptYear3} Student ${i}`;
+                students.push({
+                    id: rollNo,
+                    name: name,
+                    department: deptYear3,
+                    year: "III",
+                    subjects: [...subjectsYear3]
+                });
+            }
+
+            alert(`Generated 25 students each for Second Year ${deptYear2} and Third Year ${deptYear3}`);
+            updateStudentTable();
+        }
+
+        function generateSeating() {
+            if (students.length === 0) {
+                alert("Please load student data first!");
+                return;
+            }
+            initBenchMap();
+
+            const benches = document.querySelectorAll(".bench");
+
+            const yearIIStudents = students.filter(s => s.year === "II");
+            const yearIIIStudents = students.filter(s => s.year === "III");
+
+            for (let i = 0; i < benches.length; i++) {
+                const bench = benches[i];
+                const seats = bench.querySelectorAll(".seat");
+
+                if (i < yearIIStudents.length && i < yearIIIStudents.length) {
+                    // Assign Second Year Student to left seat
+                    seats[0].className = "seat yearII";
+                    seats[0].textContent = yearIIStudents[i].id;
+                    seats[0].title = `${yearIIStudents[i].name}\n${yearIIStudents[i].department}\nYear: ${yearIIStudents[i].year}\nSubjects: ${yearIIStudents[i].subjects.join(", ")}`;
+
+                    // Assign Third Year Student to right seat
+                    seats[1].className = "seat yearIII";
+                    seats[1].textContent = yearIIIStudents[i].id;
+                    seats[1].title = `${yearIIIStudents[i].name}\n${yearIIIStudents[i].department}\nYear: ${yearIIIStudents[i].year}\nSubjects: ${yearIIIStudents[i].subjects.join(", ")}`;
+                }
+            }
+
+            updateStudentTable();
+        }
+
+        function updateStudentTable() {
+            const tbody = document.getElementById("student-table-body");
+            tbody.innerHTML = "";
+
+            for (const student of students) {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${student.id.substring(5)}</td>
+                    <td>${student.id}</td>
+                    <td>${student.name}</td>
+                    <td>${student.department}</td>
+                    <td>${student.year}</td>
+                    <td>${student.subjects.join(", ")}</td>
+                `;
+                tbody.appendChild(row);
+            }
+        }
+
+        function resetAll() {
+            document.getElementById("exam-type").value = "cat1";
+            document.getElementById("date").value = "";
+            document.getElementById("session").value = "FN";
+            document.getElementById("block").value = "A";
+            document.getElementById("hall").value = "Hall 1";
+            document.getElementById("dept-year2").value = "CSE";
+            document.getElementById("dept-year3").value = "IT";
+            document.getElementById("bench-grid").innerHTML = "";
+            document.getElementById("student-table-body").innerHTML = "";
+            students = [];
+
+            // Reset subject selections
+            updateSubjectSelection('year2');
+            updateSubjectSelection('year3');
+        }
+
+        function downloadPDF() {
+            if (students.length === 0) {
+                alert("No student data to download!");
+                return;
+            }
+            
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF();
+            
+            // Title
+            pdf.setFontSize(16);
+            pdf.text('Student Allocation Details', 10, 10);
+            
+            // Column Headers
+            pdf.setFontSize(12);
+            pdf.text('Bench', 10, 20);
+            pdf.text('Roll No', 40, 20);
+            pdf.text('Name', 100, 20);
+            pdf.text('Department', 140, 20);
+            pdf.text('Year', 180, 20);
+            pdf.text('Subjects', 220, 20);
+            
+            // Draw a horizontal line
+            pdf.line(10, 22, 290, 22);  // Adjust line position if needed
+            
+            let y = 30;  // Starting y position for rows
+
+            for (const student of students) {
+                const benchNo = student.id.substring(5); // Get Bench from Roll No (e.g., 23AI-01 -> "01")
+
+                pdf.setFontSize(10); // Set font size for the content
+                pdf.text(benchNo, 10, y);
+                pdf.text(student.id, 40, y);
+                pdf.text(student.name, 100, y);
+                pdf.text(student.department, 140, y);
+                pdf.text(student.year, 180, y);
+
+                // Create a string to display all subjects
+                const subjects = student.subjects.length > 0 ? student.subjects.join(", ") : "None";
+                const subjectLines = pdf.splitTextToSize(subjects, 70); // Split into lines if too long
+                subjectLines.forEach((line, index) => {
+                    pdf.text(line, 220, y + (index * 10)); // Adjust position for each line
+                });
+
+                y += 10 + (subjectLines.length - 1) * 10; // Update y position based on number of subject lines
+            }
+
+            pdf.save('student_allocation.pdf');
+        }
+
+        // Initialize the page
+        initBenchMap();
+    </script>
+</body>
+
+</html>

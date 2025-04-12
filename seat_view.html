@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Seat Finder</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        header {
+            background: linear-gradient(135deg, #003366, #0055a5);
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 2rem auto;
+            padding: 1rem;
+        }
+
+        .search-panel, .seat-details {
+            background: white;
+            margin: 2rem auto;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .panel-title {
+            color: #0055a5;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .param-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .param-group label {
+            font-weight: 500;
+            color: #555;
+        }
+
+        .param-group input {
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        .btn {
+            background: #4CAF50;
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: background 0.3s;
+        }
+
+        .btn:hover {
+            background: #3e8e41;
+        }
+
+        .seat-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+            text-align: left;
+        }
+
+        .student-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-label {
+            font-weight: 500;
+            color: #555;
+            font-size: 0.9rem;
+        }
+
+        .info-value {
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1rem;
+        }
+
+        .seat-visual {
+            background: #4CAF50;
+            color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .your-seat {
+            background: #FFC107;
+            color: #333;
+            border: 2px solid #FF9800;
+        }
+
+        .error-message {
+            color: #f44336;
+            text-align: center;
+            margin-top: 1rem;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .student-info {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Exam Seat Finder</h1>
+        <p>Check your exam seating arrangement</p>
+    </header>
+
+    <div class="container">
+        <!-- Search Panel -->
+        <div class="search-panel">
+            <h2 class="panel-title">
+                <i class="fas fa-search"></i> Find Your Seat
+            </h2>
+
+            <div class="param-group">
+                <label for="rollno">Enter Your Roll Number</label>
+                <input type="text" id="rollno" placeholder="e.g. 23CS001">
+            </div>
+
+            <button class="btn" onclick="findSeat()">
+                <i class="fas fa-chair"></i> Find My Seat
+            </button>
+
+            <div id="error-message" class="error-message"></div>
+        </div>
+
+        <!-- Seat Details (shown after search) -->
+        <div id="seat-details" class="seat-details" style="display: none;">
+            <h2 class="panel-title">
+                <i class="fas fa-info-circle"></i> Your Seat Allocation
+            </h2>
+
+            <div class="seat-card">
+                <div class="student-info">
+                    <div class="info-item">
+                        <span class="info-label">Roll Number</span>
+                        <span class="info-value" id="detail-rollno">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Name</span>
+                        <span class="info-value" id="detail-name">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Department</span>
+                        <span class="info-value" id="detail-dept">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Year</span>
+                        <span class="info-value" id="detail-year">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Exam Date</span>
+                        <span class="info-value" id="detail-date">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Session</span>
+                        <span class="info-value" id="detail-session">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Subject</span>
+                        <span class="info-value" id="detail-subject">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Block</span>
+                        <span class="info-value" id="detail-block">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Hall</span>
+                        <span class="info-value" id="detail-hall">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Bench Number</span>
+                        <span class="info-value" id="detail-bench">-</span>
+                    </div>
+                </div>
+
+                <div class="seat-visual" id="seat-visual">
+                    Your Seat: <span id="seat-number"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample data - in a real application, this would come from a database
+        const examAllocations = [
+            { rollno: "23CS001", name: "Lakshmi Narayanan S", department: "CSE", year: "II", 
+              examDate: "2025-04-16", session: "FN (9:00 AM)", subject: "Artificial Intelligence and Machine Learning", 
+              block:"A", hall: "Hall 1", bench: "A1", position: "Left" },
+            { rollno: "22IT001", name: "Kishore T", department: "IT", year: "III", 
+              examDate: "2025-04-16", session: "FN (9:00 AM)", subject: "Software Engineering", 
+              block:"A", hall: "Hall 1", bench: "A1", position: "Right" },
+            { rollno: "23CS002", name: "Jagan T", department: "CSE", year: "II", 
+              examDate: "2025-04-16", session: "FN (9:00 AM)", subject: "Database Management", 
+              block:"A", hall: "Hall 1", bench: "A2", position: "Left" },
+            // Add more students as needed...
+        ];
+
+        function findSeat() {
+            const rollno = document.getElementById("rollno").value.trim().toUpperCase();
+            const errorElement = document.getElementById("error-message");
+            
+            if (!rollno) {
+                errorElement.textContent = "Please enter your roll number";
+                return;
+            }
+
+            // Find student in the allocations
+            const allocation = examAllocations.find(s => s.rollno === rollno);
+            
+            if (!allocation) {
+                errorElement.textContent = "No seat allocation found for this roll number";
+                document.getElementById("seat-details").style.display = "none";
+                return;
+            }
+
+            errorElement.textContent = "";
+            displaySeatDetails(allocation);
+            document.getElementById("seat-details").style.display = "block";
+        }
+
+        function displaySeatDetails(allocation) {
+            document.getElementById("detail-rollno").textContent = allocation.rollno;
+            document.getElementById("detail-name").textContent = allocation.name;
+            document.getElementById("detail-dept").textContent = allocation.department;
+            document.getElementById("detail-year").textContent = allocation.year;
+            document.getElementById("detail-date").textContent = formatDate(allocation.examDate);
+            document.getElementById("detail-session").textContent = allocation.session;
+            document.getElementById("detail-subject").textContent = allocation.subject;
+            document.getElementById("detail-block").textContent = allocation.block;
+            document.getElementById("detail-hall").textContent = allocation.hall;
+            document.getElementById("detail-bench").textContent = allocation.bench + " (" + allocation.position + ")";
+            
+            // Highlight the seat visually
+            const seatVisual = document.getElementById("seat-visual");
+            seatVisual.textContent = "Your Seat: " + allocation.bench + " (" + allocation.position + ")";
+            seatVisual.className = "seat-visual your-seat";
+        }
+
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString('en-US', options);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nandha College - Exam Hall Navigation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ===== BASE STYLES ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #f5f7fa;
+            color: #333;
+        }
+
+        /* ===== HEADER ===== */
+        header {
+            background: linear-gradient(135deg, #003366, #0055a5);
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        /* ===== MAIN CONTAINER ===== */
+        .container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        /* ===== EXAM SELECTION FORM ===== */
+        .exam-form {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-title {
+            color: #0055a5;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            font-weight: 500;
+            color: #555;
+        }
+
+        .form-group select, .form-group input {
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        .submit-btn {
+            background: #0055a5;
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: background 0.3s;
+        }
+
+        .submit-btn:hover {
+            background: #003366;
+        }
+
+        /* ===== NAVIGATION CARD ===== */
+        .nav-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            display: none; /* Initially hidden */
+        }
+
+        .card-title {
+            color: #0055a5;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* ===== INTERACTIVE MAP ===== */
+        .map-wrapper {
+            position: relative;
+            height: 500px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #ddd;
+            margin-bottom: 1.5rem;
+        }
+
+        #interactive-map {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* ===== PATH VISUALIZATION ===== */
+        .path-visual {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            max-width: 300px;
+        }
+
+        .path-marker {
+            width: 20px;
+            height: 20px;
+            background: #F44336;
+            border-radius: 50%;
+            border: 2px solid white;
+            position: absolute;
+            transform: translate(-50%, -50%);
+            z-index: 200;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(244, 67, 54, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0); }
+        }
+
+        /* ===== PATH STEPS ===== */
+        .path-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .path-step {
+            display: flex;
+            gap: 1rem;
+            padding: 0.8rem;
+            border-radius: 6px;
+            background: #f9f9f9;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .path-step.active {
+            background: #e3f2fd;
+            border-left: 4px solid #0055a5;
+        }
+
+        .path-step.completed {
+            opacity: 0.7;
+        }
+
+        .step-number {
+            width: 24px;
+            height: 24px;
+            background: #0055a5;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-weight: bold;
+        }
+
+        .active .step-number {
+            background: #4CAF50;
+        }
+
+        .completed .step-number {
+            background: #9E9E9E;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-distance {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 0.3rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        /* ===== CONTROLS ===== */
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .control-btn {
+            padding: 0.8rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: none;
+            transition: all 0.3s;
+        }
+
+        .start-btn {
+            background: #0055a5;
+            color: white;
+        }
+
+        .start-btn:hover {
+            background: #003366;
+        }
+
+        .reset-btn {
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .reset-btn:hover {
+            background: #e0e0e0;
+        }
+
+        /* ===== EXAM INFO ===== */
+        .exam-info {
+            background: #e3f2fd;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+
+        .exam-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .info-item {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #0055a5;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .map-wrapper {
+                height: 400px;
+            }
+
+            .path-visual {
+                max-width: 200px;
+                padding: 0.8rem;
+                font-size: 0.9rem;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .map-wrapper {
+                height: 350px;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo">Exam Navigation</div>
+            <p>Find your exact path to exam hall based on your schedule</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Exam Selection Form -->
+        <div class="exam-form">
+            <h2 class="form-title">
+                <i class="fas fa-clipboard-list"></i> Enter Your Exam Details
+            </h2>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="block">Block Number</label>
+                    <select id="block">
+                        <option value="">Select Block</option>
+                        <option value="A">Block A</option>
+                        <option value="B">Block B</option>
+                        <option value="C">Block C</option>
+                        <option value="D">Block D</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="hall">Hall Number</label>
+                    <input type="text" id="hall" placeholder="Eg: 1" required>
+                </div>
+            </div>
+
+            <button class="submit-btn" id="submit-btn">
+                <i class="fas fa-directions"></i> Get Directions
+            </button>
+        </div>
+
+        <!-- Exam Information Display -->
+        <div class="exam-info" id="exam-info">
+            <div class="exam-info-grid">
+                <div class="info-item">
+                    <span class="info-label">Location:</span>
+                    <span id="info-location"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Card (Shown after form submission) -->
+        <div class="nav-card" id="nav-card">
+            <h2 class="card-title">
+                <i class="fas fa-map-marked-alt"></i> Exam Hall Navigation
+            </h2>
+
+            <div class="map-wrapper">
+                <!-- Main College Map -->
+                <iframe id="interactive-map"
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3916.731758020042!2d77.6184425!3d11.2860707!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba96d97cfae1069%3A0x7369b4b751e95b88!2sNandha%20Engineering%20College!5e0!3m2!1sen!2sin!4v1710000000000!5m2!1sen!2sin"
+                    allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+                </iframe>
+
+                <!-- Path Visualization Overlay -->
+                <div class="path-visual" id="path-visual">
+                    <div style="font-weight: 600; margin-bottom: 0.5rem;">
+                        <i class="fas fa-walking"></i> Select your exam details first
+                    </div>
+                </div>
+
+                <!-- Moving Position Marker -->
+                <div class="path-marker" id="path-marker" style="display: none;"></div>
+            </div>
+
+            <!-- Path Steps -->
+            <div class="path-steps" id="path-steps">
+                <!-- Steps will be added by JavaScript -->
+            </div>
+
+            <!-- Controls -->
+            <div class="controls">
+                <button class="control-btn start-btn" id="start-btn">
+                    <i class="fas fa-play"></i> Start Navigation
+                </button>
+                <button class="control-btn reset-btn" id="reset-btn">
+                    <i class="fas fa-redo"></i> Reset
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Database of exam hall locations
+        const examLocations = {
+            "A": {
+                "1": { lat: 11.2860, lng: 77.61855, name: "Main Building - First Floor" },
+                "5": { lat: 11.2861, lng: 77.6184, name: "Main Building - Ground Floor" },
+                "8": { lat: 11.2862, lng: 77.6183, name: "Main Building - Second Floor" }
+            },
+            "B": {
+                "1": { lat: 11.2859, lng: 77.6186, name: "Science Block - Hall 1" },
+                "3": { lat: 11.2858, lng: 77.6185, name: "Science Block - East Wing" }
+            },
+            "C": {
+                "7": { lat: 11.2863, lng: 77.6180, name: "Engineering Block - Room 7" },
+                "1": { lat: 11.2864, lng: 77.6179, name: "Engineering Block - Hall 1" }
+            },
+            "D": {
+                "1": { lat: 11.2858, lng: 77.6190, name: "New Block - Hall 1" },
+                "11": { lat: 11.2856, lng: 77.6189, name: "New Block - Lab Complex" }
+            }
+        };
+
+        // Different paths for different blocks
+        const pathTemplates = {
+            "A": [
+                { position: { lat: 11.2861, lng: 77.6183 }, instruction: "Start at Main Gate", distance: "0m" },
+                { position: { lat: 11.28615, lng: 77.61825 }, instruction: "Walk straight along main pathway", distance: "50m" },
+                { position: { lat: 11.2862, lng: 77.6182 }, instruction: "Pass by the central fountain", distance: "100m" },
+                { position: { lat: 11.28618, lng: 77.6183 }, instruction: "Turn left towards Main Building", distance: "150m" },
+                { position: { lat: 11.2860, lng: 77.6184 }, instruction: "Enter through Gate 2", distance: "200m" },
+                { position: { lat: 11.2860, lng: 77.6185 }, instruction: "Turn right into corridor", distance: "225m" },
+                { position: { lat: 11.2860, lng: 77.61855 }, instruction: "Your room is in middle section", distance: "250m" }
+            ],
+            "B": [
+                { position: { lat: 11.2861, lng: 77.6183 }, instruction: "Start at Main Gate", distance: "0m" },
+                { position: { lat: 11.28605, lng: 77.61835 }, instruction: "Take the left pathway", distance: "50m" },
+                { position: { lat: 11.2860, lng: 77.6184 }, instruction: "Walk past the library", distance: "100m" },
+                { position: { lat: 11.28595, lng: 77.61845 }, instruction: "Turn right at the junction", distance: "150m" },
+                { position: { lat: 11.2859, lng: 77.6185 }, instruction: "Enter Science Block", distance: "200m" },
+                { position: { lat: 11.2859, lng: 77.61855 }, instruction: "Proceed to your hall", distance: "225m" }
+            ],
+            "C": [
+                { position: { lat: 11.2861, lng: 77.6183 }, instruction: "Start at Main Gate", distance: "0m" },
+                { position: { lat: 11.2862, lng: 77.6182 }, instruction: "Walk towards the fountain", distance: "80m" },
+                { position: { lat: 11.28625, lng: 77.6181 }, instruction: "Take the right path towards Engineering Block", distance: "150m" },
+                { position: { lat: 11.2863, lng: 77.61805 }, instruction: "Enter through main doors", distance: "200m" },
+                { position: { lat: 11.28635, lng: 77.6180 }, instruction: "Go up the stairs", distance: "230m" }
+            ],
+            "D": [
+                { position: { lat: 11.2861, lng: 77.6183 }, instruction: "Start at Main Gate", distance: "0m" },
+                { position: { lat: 11.28605, lng: 77.61835 }, instruction: "Take the left pathway", distance: "50m" },
+                { position: { lat: 11.2860, lng: 77.6184 }, instruction: "Continue past the canteen", distance: "100m" },
+                { position: { lat: 11.2859, lng: 77.6185 }, instruction: "Turn left at the T-junction", distance: "180m" },
+                { position: { lat: 11.2858, lng: 77.6186 }, instruction: "Enter New Block complex", distance: "250m" },
+                { position: { lat: 11.28575, lng: 77.6187 }, instruction: "Check your hall number", distance: "280m" }
+            ]
+        };
+
+        let currentNavigationPath = [];
+        let currentStep = 0;
+        let isNavigating = false;
+        let animationInterval;
+        let markerPosition = { lat: 0, lng: 0 };
+
+        // Initialize the form
+        function initForm() {
+            document.getElementById('submit-btn').addEventListener('click', function(e) {
+                e.preventDefault();
+                setupNavigation();
+            });
+        }
+
+        // Set up navigation based on form inputs
+        function setupNavigation() {
+            const block = document.getElementById('block').value;
+            const hall = document.getElementById('hall').value.trim();
+
+            // Validate inputs
+            if (!block || !hall) {
+                alert("Please fill in all exam details");
+                return;
+            }
+
+            // Check if hall exists in selected block
+            const hallNum = hall.replace(/^0+/, ''); // Remove leading zeros
+            if (!examLocations[block] || !examLocations[block][hallNum]) {
+                alert("The specified hall doesn't exist in this block. Please check your details.");
+                return;
+            }
+
+            // Get the path for the selected block
+            const basePath = pathTemplates[block];
+            const hallLocation = examLocations[block][hallNum];
+
+            // Create a copy of the base path
+            currentNavigationPath = JSON.parse(JSON.stringify(basePath));
+
+            // Modify the last step to include hall info
+            const lastStep = currentNavigationPath[currentNavigationPath.length - 1];
+            lastStep.position = { ...hallLocation.position };
+            lastStep.instruction = `Your room is in ${hallLocation.name} (Hall ${block}${hall})`;
+
+            // Update the exam info display
+            document.getElementById('info-location').textContent = `${block} Block - Hall ${hall}`;
+
+            // Show the exam info and navigation card
+            document.getElementById('exam-info').style.display = 'block';
+            document.getElementById('nav-card').style.display = 'block';
+
+            // Initialize the path
+            initPath();
+
+            // Scroll to navigation
+            document.getElementById('nav-card').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Initialize the path display
+        function initPath() {
+            const pathSteps = document.getElementById('path-steps');
+            pathSteps.innerHTML = '';
+
+            currentNavigationPath.forEach((step, index) => {
+                const stepDiv = document.createElement('div');
+                stepDiv.className = 'path-step';
+                stepDiv.innerHTML = `
+                    <div class="step-number">${index + 1}</div>
+                    <div class="step-content">
+                        <div>${step.instruction}</div>
+                        <div class="step-distance">
+                            <i class="fas fa-arrows-alt-h"></i> ${step.distance}
+                        </div>
+                    </div>
+                `;
+
+                stepDiv.addEventListener('click', () => {
+                    if (!isNavigating) {
+                        jumpToStep(index);
+                    }
+                });
+
+                pathSteps.appendChild(stepDiv);
+            });
+
+            // Set initial marker position
+            markerPosition = { ...currentNavigationPath[0].position };
+            updateMarkerPosition(markerPosition);
+            document.getElementById('path-marker').style.display = 'block';
+
+            // Update path visual info
+            updatePathVisual();
+
+            // Reset navigation state
+            currentStep = 0;
+            isNavigating = false;
+            document.getElementById('start-btn').innerHTML = '<i class="fas fa-play"></i> Start Navigation';
+
+            // Update step highlighting
+            updateStepHighlight();
+        }
+
+        // Update the path visual information
+        function updatePathVisual() {
+            const block = document.getElementById('block').value;
+            const hall = document.getElementById('hall').value.trim();
+
+            document.getElementById('path-visual').innerHTML = `
+                <div style="font-weight: 600; margin-bottom: 0.5rem;">
+                    <i class="fas fa-walking"></i> Path to ${block}${hall}
+                </div>
+                <div style="font-size: 0.9rem; color: #666; margin-bottom: 0.5rem;">
+                    Total distance: ~${getTotalDistance()}m | Estimated time: ${getEstimatedTime()}
+                </div>
+            `;
+        }
+
+        // Calculate total path distance (simplified)
+        function getTotalDistance() {
+            const lastStep = currentNavigationPath[currentNavigationPath.length - 1];
+            return lastStep.distance.replace('m', '');
+        }
+
+        // Calculate estimated time (simplified)
+        function getEstimatedTime() {
+            const distance = parseInt(getTotalDistance());
+            const minutes = Math.ceil(distance / 50);
+            return `${minutes} min walk`;
+        }
+
+        // Start the navigation animation
+        function startNavigation() {
+            if (isNavigating) return;
+
+            const startBtn = document.getElementById('start-btn');
+            startBtn.innerHTML = '<i class="fas fa-pause"></i> Navigating';
+            isNavigating = true;
+
+            if (currentStep >= currentNavigationPath.length - 1) {
+                currentStep = 0;
+                markerPosition = { ...currentNavigationPath[0].position };
+            }
+
+            updateStepHighlight();
+            animateToNextStep();
+        }
+
+        // Animate movement to next step
+        function animateToNextStep() {
+            if (currentStep >= currentNavigationPath.length - 1) {
+                endNavigation();
+                return;
+            }
+
+            const startPos = currentNavigationPath[currentStep].position;
+            const endPos = currentNavigationPath[currentStep + 1].position;
+            const steps = 20;
+            let stepCount = 0;
+
+            clearInterval(animationInterval);
+
+            animationInterval = setInterval(() => {
+                if (stepCount >= steps) {
+                    clearInterval(animationInterval);
+                    currentStep++;
+                    updateStepHighlight();
+
+                    if (isNavigating) {
+                        setTimeout(animateToNextStep, 1000);
+                    }
+                    return;
+                }
+
+                stepCount++;
+                const ratio = stepCount / steps;
+                markerPosition.lat = startPos.lat + (endPos.lat - startPos.lat) * ratio;
+                markerPosition.lng = startPos.lng + (endPos.lng - startPos.lng) * ratio;
+
+                updateMarkerPosition(markerPosition);
+            }, 100);
+        }
+
+        // Update marker position on map
+        function updateMarkerPosition(position) {
+            const marker = document.getElementById('path-marker');
+            const x = ((position.lng - 77.6179) / (77.6193 - 77.6179)) * 100;
+            const y = ((11.2867 - position.lat) / (11.2867 - 11.2855)) * 100;
+
+            marker.style.left = `${Math.min(95, Math.max(5, x))}%`;
+            marker.style.top = `${Math.min(95, Math.max(5, y))}%`;
+
+            updateMapView(position);
+        }
+
+        // Update map view to center on position
+        function updateMapView(position) {
+            const iframe = document.getElementById('interactive-map');
+            iframe.src = `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3916.731758020042!2d77.6184425!3d11.2860707!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba96d97cfae1069%3A0x7369b4b751e95b88!2sNandha%20Engineering%20College!5e0!3m2!1sen!2sin!4v1710000000000!5m2!1sen!2sin&q=${position.lat},${position.lng}&z=19`;
+        }
+
+        // Update step highlighting
+        function updateStepHighlight() {
+            const steps = document.querySelectorAll('.path-step');
+            steps.forEach((step, index) => {
+                step.classList.toggle('active', index === currentStep);
+                step.classList.toggle('completed', index < currentStep);
+            });
+
+            if (currentNavigationPath[currentStep]) {
+                const currentPath = currentNavigationPath[currentStep];
+                document.getElementById('path-visual').innerHTML = `
+                    <div style="font-weight: 600; margin-bottom: 0.5rem;">
+                        <i class="fas fa-walking"></i> ${currentPath.instruction}
+                    </div>
+                    <div style="font-size: 0.9rem; color: #666; margin-bottom: 0.5rem;">
+                        <i class="fas fa-arrows-alt-h"></i> ${currentPath.distance} | 
+                        Step ${currentStep + 1} of ${currentNavigationPath.length}
+                    </div>
+                `;
+            }
+        }
+
+        // Jump to specific step
+        function jumpToStep(stepIndex) {
+            currentStep = stepIndex;
+            markerPosition = { ...currentNavigationPath[stepIndex].position };
+            updateMarkerPosition(markerPosition);
+            updateStepHighlight();
+        }
+
+        // End navigation
+        function endNavigation() {
+            clearInterval(animationInterval);
+            isNavigating = false;
+            document.getElementById('start-btn').innerHTML = '<i class="fas fa-check"></i> Route Complete';
+        }
+
+        // Reset navigation
+        function resetNavigation() {
+            clearInterval(animationInterval);
+            isNavigating = false;
+            currentStep = 0;
+            if (currentNavigationPath.length > 0) {
+                markerPosition = { ...currentNavigationPath[0].position };
+                updateMarkerPosition(markerPosition);
+            }
+            updateStepHighlight();
+            document.getElementById('start-btn').innerHTML = '<i class="fas fa-play"></i> Start Navigation';
+            updatePathVisual();
+        }
+
+        // Event listeners
+        document.getElementById('start-btn').addEventListener('click', startNavigation);
+        document.getElementById('reset-btn').addEventListener('click', resetNavigation);
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', function() {
+            initForm();
+        });
+    </script>
+</body>
+</html>

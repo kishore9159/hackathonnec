@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Exam Seating System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        header {
+            background: linear-gradient(135deg, #003366, #0055a5);
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .control-panel,
+        .hall-selection,
+        .seat-map,
+        .student-list,
+        .upload-module,
+        .allocation-module {
+            background: white;
+            margin: 2rem auto;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .panel-title {
+            color: #0055a5;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .params {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .param-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .param-group label {
+            font-weight: 500;
+            color: #555;
+        }
+
+        .param-group select,
+        .param-group input {
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        .btn {
+            background: #4CAF50;
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: background 0.3s;
+            margin-right: 1rem;
+        }
+
+        .btn:hover {
+            background: #3e8e41;
+        }
+
+        .btn-danger {
+            background: #f44336;
+        }
+
+        .btn-danger:hover {
+            background: #d32f2f;
+        }
+
+        .student-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1rem;
+        }
+
+        .student-table th,
+        .student-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .student-table th {
+            background: #f5f7fa;
+            font-weight: 600;
+        }
+
+        .student-table tr:hover {
+            background: #f5f7fa;
+        }
+        
+        .multi-select {
+            width: 100%;
+        }
+
+        .select2-container {
+            width: 100% !important;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>College Exam Seating System</h1>
+        <p>Automated seat allocation with anti-cheating measures</p>
+    </header>
+
+    <div class="container">
+        <!-- Control Panel -->
+        <div class="control-panel">
+            <h2 class="panel-title">
+                <i class="fas fa-cogs"></i> Exam Configuration
+            </h2>
+            <div class="params">
+                <div class="param-group">
+                    <label for="exam-type">Exam Type</label>
+                    <select id="exam-type">
+                        <option value="cat1">CAT 1</option>
+                        <option value="cat2">CAT 2</option>
+                        <option value="semester">Even Semester Exam</option>
+                    </select>
+                </div>
+                <div class="param-group">
+                    <label for="date">Date</label>
+                    <input type="date" id="date">
+                </div>
+                <div class="param-group">
+                    <label for="session">Session</label>
+                    <select id="session">
+                        <option value="FN">Forenoon (FN) - 9:00 AM to 12:00 PM</option>
+                        <option value="AN">Afternoon (AN) - 1:00 PM to 4:00 PM</option>
+                    </select>
+                </div>
+                <div class="param-group">
+                    <label for="block">Block</label>
+                    <select id="block">
+                        <option value="A">Block A</option>
+                        <option value="B">Block B</option>
+                        <option value="C">Block C</option>
+                    </select>
+                </div>
+                <div class="param-group">
+                    <label for="hall">Hall</label>
+                    <select id="hall">
+                        <option value="Hall 1">Hall 1</option>
+                        <option value="Hall 2">Hall 2</option>
+                        <option value="Hall 3">Hall 3</option>
+                    </select>
+                </div>
+            </div>
+            <div>
+                <button class="btn" onclick="loadSampleData()">
+                    <i class="fas fa-database"></i> Load Sample Data
+                </button>
+                <button class="btn" onclick="resetAll()">
+                    <i class="fas fa-trash"></i> Reset All
+                </button>
+            </div>
+        </div>
+
+        <!-- Student Allocation Details Section -->
+        <div class="allocation-module">
+            <h3 class="panel-title">Student Allocation Details</h3>
+            <table class="student-table" id="student-allocation-table">
+                <thead>
+                    <tr>
+                        <th>Bench</th>
+                        <th>Roll No</th>
+                        <th>Name</th>
+                        <th>Department</th>
+                        <th>Year</th>
+                        <th>Subjects</th>
+                    </tr>
+                </thead>
+                <tbody id="student-allocation-body">
+                    <!-- This will be filled with JavaScript -->
+                </tbody>
+            </table>
+            <button class="btn" onclick="downloadAllocationPDF()">
+                <i class="fas fa-file-pdf"></i> Download Allocation PDF
+            </button>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.3.1/jspdf.umd.min.js"></script>
+    <script>
+        let students = [];
+
+        function loadSampleData() {
+            const sampleDepartments = ["CSE", "IT", "AI&DS"];
+            const sampleSubjects = {
+                "CSE": ["AI and ML", "DBMS", "Networks"],
+                "IT": ["Software Engineering", "DBMS", "Networks"],
+                "AI&DS": ["AI and ML", "Data Science"]
+            };
+
+            // Clear existing data
+            students = [];
+            const tbody = document.getElementById("student-allocation-body");
+            tbody.innerHTML = "";  // Clear the previous table body
+
+            // Generating sample student data
+            for (let i = 1; i <= 10; i++) {
+                const dept = sampleDepartments[Math.floor(Math.random() * sampleDepartments.length)];
+                const rollNo = `20${Math.floor(Math.random() * 20)}${dept.charAt(0)}${i.toString().padStart(3, '0')}`;
+                const name = `Student ${i}`;
+                students.push({
+                    bench: `B${i}`,
+                    rollNo,
+                    name,
+                    department: dept,
+                    year: (i % 2 === 0) ? "II" : "III",
+                    subjects: sampleSubjects[dept].join(", ")
+                });
+            }
+
+            // Populate the table
+            for (const student of students) {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${student.bench}</td>
+                    <td>${student.rollNo}</td>
+                    <td>${student.name}</td>
+                    <td>${student.department}</td>
+                    <td>${student.year}</td>
+                    <td>${student.subjects}</td>
+                `;
+                tbody.appendChild(row);
+            }
+        }
+
+        function downloadAllocationPDF() {
+            if (students.length === 0) {
+                alert("No student allocation data to download!");
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF();
+
+            // Title
+            pdf.setFontSize(16);
+            pdf.text('Student Allocation Details', 10, 10);
+
+            // Column Headers
+            pdf.setFontSize(12);
+            pdf.text('Bench', 10, 20);
+            pdf.text('Roll No', 40, 20);
+            pdf.text('Name', 90, 20);
+            pdf.text('Department', 130, 20);
+            pdf.text('Year', 170, 20);
+            pdf.text('Subjects', 210, 20);
+
+            // Draw a horizontal line
+            pdf.line(10, 22, 290, 22);
+
+            let y = 30;
+
+            for (const student of students) {
+                pdf.setFontSize(10);
+                pdf.text(student.bench, 10, y);
+                pdf.text(student.rollNo, 40, y);
+                pdf.text(student.name, 90, y);
+                pdf.text(student.department, 130, y);
+                pdf.text(student.year, 170, y);
+                pdf.text(student.subjects, 210, y);
+
+                y += 10;  // Move to the next row
+            }
+
+            pdf.save('student_allocation.pdf');
+        }
+
+        function resetAll() {
+            // Resetting the students array and the table
+            students = [];
+            document.getElementById("student-allocation-body").innerHTML = "";
+        }
+    </script>
+</body>
+
+</html>
